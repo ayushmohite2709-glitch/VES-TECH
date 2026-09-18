@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const initialForm = {
   rfid_uid: "",
@@ -10,10 +10,48 @@ const initialForm = {
   total_visitor_members: 1,
 };
 
+const POLL_INTERVAL_MS = 2000;
+const SCAN_FRESHNESS_MS = 10000; // ignore scans older than this (e.g. on first load)
+
 export default function RegisterCardPage() {
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState(null); // { type: 'success' | 'error', text }
+  const [message, setMessage] = useState(null);
+  const [scanning, setScanning] = useState(false);
+
+  // tracks the last scan we've already reacted to, so we don't re-fill on every poll
+  const lastSeenScanRef = useRef(null);
+
+  useEffect(() => {
+    const poll = async () => {
+      try {
+        const res = await fetch("/api/rfid/latest-scan");
+        if (!res.ok) return;
+        const { log } = await res.json();
+        if (!log) return;
+
+        const scanKey = `${log.rfid_uid}-${log.scanned_at}`;
+        if (scanKey === lastSeenScanRef.current) return; // already handled
+
+        lastSeenScanRef.current = scanKey;
+
+        // only react to unregistered-card taps, and only if the tap is recent
+        // (prevents an old log row from auto-filling the form on page load)
+        const age_ms = Date.now() - new Date(log.scanned_at).getTime();
+        if (log.result === "denied_unknown" && age_ms < SCAN_FRESHNESS_MS) {
+          setForm((prev) => ({ ...prev, rfid_uid: log.rfid_uid }));
+          setScanning(true);
+          setTimeout(() => setScanning(false), 1500);
+        }
+      } catch {
+        // silent - just try again next tick
+      }
+    };
+
+    poll(); // run once immediately so a fresh scan on load isn't missed
+    const interval = setInterval(poll, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,6 +91,7 @@ export default function RegisterCardPage() {
         text: `Card ${form.rfid_uid} assigned to ${form.person_name}`,
       });
       setForm(initialForm);
+      lastSeenScanRef.current = null; // allow the same UID to be re-detected later if re-scanned
     } catch (err) {
       setMessage({ type: "error", text: "Network error, try again" });
     } finally {
@@ -75,6 +114,9 @@ export default function RegisterCardPage() {
             placeholder="Scan card or enter UID"
             className="w-full border rounded px-3 py-2 text-sm"
           />
+          {scanning && (
+            <p className="text-xs text-blue-600 mt-1">Card detected ✓</p>
+          )}
         </div>
 
         <div>

@@ -1,0 +1,104 @@
+"use client";
+
+import { useState } from "react";
+
+const initialForm = {
+  rfid_uid: "",
+  person_name: "",
+  age: "",
+  contact_no: "",
+  total_visitor_members: 1,
+};
+
+export default function RegisterCardPage() {
+  const [form, setForm] = useState(initialForm);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState(null); // { type: 'success' | 'error', text }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setMessage(null);
+
+    try {
+      const res = await fetch("/api/rfid/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rfid_uid: form.rfid_uid.trim(),
+          person_name: form.person_name.trim(),
+          age: form.age ? Number(form.age) : null,
+          contact_no: form.contact_no.trim(),
+          total_visitor_members: Number(form.total_visitor_members) || 1,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage({
+          type: "error",
+          text: data.error || "Registration failed",
+        });
+        return;
+      }
+
+      setMessage({
+        type: "success",
+        text: `Card ${form.rfid_uid} assigned to ${form.person_name}`,
+      });
+      setForm(initialForm);
+    } catch (err) {
+      setMessage({ type: "error", text: "Network error, try again" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="p-6 max-w-md mx-auto space-y-6">
+      <h1 className="text-2xl font-bold">Register / Assign RFID Card</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">RFID UID</label>
+          <input
+            name="rfid_uid"
+            value={form.rfid_uid}
+            onChange={handleChange}
+            required
+            placeholder="Scan card or enter UID"
+            className="w-full border rounded px-3 py-2 text-sm"
+          />
+        </div>
+
+       
+
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full bg-blue-600 text-white py-2 rounded text-sm disabled:opacity-50"
+        >
+          {submitting ? "Registering..." : "Register Card"}
+        </button>
+      </form>
+
+      {message && (
+        <div
+          className={`p-3 rounded text-sm ${
+            message.type === "success"
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
+    </div>
+  );
+}
