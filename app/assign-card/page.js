@@ -137,6 +137,8 @@ export default function RegisterCardPage() {
             type="number"
             value={form.age}
             onChange={handleChange}
+            maxLength={3}
+            max={100}
             className="w-full border rounded px-3 py-2 text-sm"
           />
         </div>
@@ -149,6 +151,8 @@ export default function RegisterCardPage() {
             name="contact_no"
             value={form.contact_no}
             onChange={handleChange}
+            type="tel"
+            maxLength={10}
             className="w-full border rounded px-3 py-2 text-sm"
           />
         </div>
