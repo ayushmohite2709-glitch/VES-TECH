@@ -21,12 +21,12 @@ const Navbar = () => {
   return (
     <div className="w-full">
       <nav className="bg-white">
-        <div className="flex items-center justify-between w-full max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-2">
             <Link href="/dashboard" aria-label="Go to dashboard">
               <Image
                 className="hidden md:block cursor-pointer"
-                src="/brand.jpeg"
+                src="/brandd.jpeg"
                 alt="Brand Logo"
                 width={180}
                 height={10}
