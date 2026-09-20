@@ -1,17 +1,27 @@
-import Image from "next/image";
+"use client";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 
 export default function Home() {
+    const { isLoaded, isSignedIn } = useUser();
+    if (!isLoaded) return null;
   return (
     <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+     
+     
+          {isSignedIn ? (
+  <UserButton afterSignOutUrl="/" />
+) : (
+  <div className="flex flex-col items-center">
+    <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+      <button className="relative overflow-hidden bg-[#111111] text-white rounded-full px-6 py-3 transition-all duration-300 cursor-pointer text-[15px] font-medium group">
+        <span className="relative z-10">Get Started</span>
+        <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out bg-gradient-to-r from-transparent via-white/30 to-transparent"></span>
+      </button>
+    </SignInButton>
+  </div>
+)}
+     
       <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             To get started, edit the{" "}
@@ -45,13 +55,6 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
             Deploy Now
           </a>
           <a
