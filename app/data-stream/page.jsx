@@ -1,5 +1,6 @@
 "use client";
 
+import Navbar from "@/components/Navbar";
 import { useEffect, useRef, useState } from "react";
 
 const STREAM_URL =
@@ -81,6 +82,7 @@ export default function RoomMonitor() {
 
   return (
     <div style={{ padding: "2rem", fontFamily: "monospace" }}>
+      <Navbar/>
       <h1>Room Crowd Status</h1>
       <p>
         Connection Status: <strong>{statusLabel}</strong>

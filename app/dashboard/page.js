@@ -1,5 +1,6 @@
 "use client";
 
+import Navbar from "@/components/Navbar";
 import { useEffect, useState, useCallback } from "react";
 
 export default function DashboardPage() {
@@ -45,6 +46,7 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 space-y-8">
+      <Navbar/>
       <h1 className="text-2xl font-bold">Visitor RFID Dashboard</h1>
 
       <section>
